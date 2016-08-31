@@ -14,7 +14,8 @@ var oldTime = performance.now();
  */
 function loop(newTime) {
   var elapsedTime = newTime - oldTime;
-
+  oldTime = newTime;
+  
   update(elapsedTime);
   render(elapsedTime);
 
@@ -34,6 +35,8 @@ function loop(newTime) {
  * the number of milliseconds passed since the last frame.
  */
 function update(elapsedTime) {
+
+	// use elapsedTime * snake pos to ensure game is same speed on every machine.
 
   // TODO: Spawn an apple periodically
   // TODO: Grow the snake periodically
