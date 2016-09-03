@@ -8,18 +8,34 @@ var backCtx = backBuffer.getContext('2d');
 var oldTime = performance.now();
 
 var mTileSize = 20;
-var mTileX = backBuffer.height/mTileSize + 2; // 20px + 'wall'
-var mTileY = backBuffer.width/mTileSize + 2; // 20px + 'wall'
+var mTileX = backBuffer.height / mTileSize + 2; // 20px + 'wall'
+var mTileY = backBuffer.width / mTileSize + 2; // 20px + 'wall'
 var mTiles = new Array(mTileX);
-for(var x = 0; x < mTileX; x++) {
-	mTiles[x] = new Array(mTileY);
+
+var Tile = {
+  x,
+  y,
+  type
 }
 
-var mSnakeX = 8;
-var mSnakeY = 25;
+var Snake = {
+  x,
+  y,
+  tail,
+  direction,
+  speed
+}
 
-var mDirection = 'down';
-//var mSpeed;
+function start() {
+  for (var x = 0; x < mTileX; x++) {
+    mTiles[x] = new Array(mTileY);
+  }
+
+  Snake.direction = 'down';
+  Snake.x = 8;
+  Snake.y = 25;
+  Snake.tail = [[7, 25], [6, 25]];
+}
 
 /**
  * @function loop
@@ -29,7 +45,7 @@ var mDirection = 'down';
 function loop(newTime) {
   var elapsedTime = newTime - oldTime;
   oldTime = newTime;
-  
+
   update(elapsedTime);
   render(elapsedTime);
 
@@ -50,7 +66,7 @@ function loop(newTime) {
  */
 function update(elapsedTime) {
 
-	// use elapsedTime * snake pos to ensure game is same speed on every machine.
+  // use elapsedTime * snake pos to ensure game is same speed on every machine.
 
   // TODO: Spawn an apple periodically
   // TODO: Grow the snake periodically
@@ -72,68 +88,69 @@ function render(elapsedTime) {
   backCtx.clearRect(0, 0, backBuffer.width, backBuffer.height);
 
   // TODO: Draw the game objects into the backBuffer
-  
-  backCtx.fillRect(mSnakeX * 20, mSnakeY * 20, 20, 20);
+
+  backCtx.fillRect(Snake.x * 20, Snake.y * 20, 20, 20);
 
 }
 
 function moveSnake() {
-	var lNextTile;
-	switch (mDirection) {
-		case "up":
-			lNextTile = mTiles[mSnakeX - 1][mSnakeY];
-			break;
-		
-		case "left":
-			lNextTile = [mSnakeX][mSnakeY - 1];
-			break;
-		
-		case "right":
-			lNextTile = [mSnakeX][mSnakeY + 1];
-			break;
-		
-		case "down":
-			lNextTile = [mSnakeX + 1][mSnakeY];
-			break;
-	}
-	
-	switch (lNextTile) {
-		
-	}
+  var lNextTile;
+  switch (Snake.direction) {
+    case "up":
+      lNextTile = mTiles[Snake.x - 1][Snake.y];
+      break;
+
+    case "left":
+      lNextTile = [Snake.x][Snake.y - 1];
+      break;
+
+    case "right":
+      lNextTile = [Snake.x][Snake.y + 1];
+      break;
+
+    case "down":
+      lNextTile = [Snake.x + 1][Snake.y];
+      break;
+  }
+
+  switch (lNextTile) {
+
+  }
 }
 
 window.onkeydown = function (event) { // onkeypress?
-	switch (event.keyCode) {
+  switch (event.keyCode) {
 
-        //Up
-        case 38:
-        case 87:
-            event.preventDefault();
-            if (mDirection != "down") mDirection = "up";
-            break;
+    //Up
+    case 38:
+    case 87:
+      event.preventDefault();
+      if (Snake.direction != "down") Snake.direction = "up";
+      break;
 
-        //Left
-        case 37:
-        case 65:
-            event.preventDefault();
-            if (mDirection != "right") mDirection = "left";
-            break;
+    //Left
+    case 37:
+    case 65:
+      event.preventDefault();
+      if (Snake.direction != "right") Snake.direction = "left";
+      break;
 
-        //Right
-        case 39:
-        case 68:
-            event.preventDefault();
-            if (mDirection != "left") mDirection = "right";
-            break;
+    //Right
+    case 39:
+    case 68:
+      event.preventDefault();
+      if (Snake.direction != "left") Snake.direction = "right";
+      break;
 
-        //Down
-        case 40:
-        case 83:
-            event.preventDefault();
-            if (mDirection != "up") mDirection = "down";
-            break;
-    }
+    //Down
+    case 40:
+    case 83:
+      event.preventDefault();
+      if (Snake.direction != "up") Snake.direction = "down";
+      break;
+  }
 }
 
+start();
 /* Launch the game */
 window.requestAnimationFrame(loop);
