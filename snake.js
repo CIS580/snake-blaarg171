@@ -11,30 +11,18 @@ var mTileSize = 20;
 var mTileX = backBuffer.height / mTileSize + 2; // 20px + 'wall'
 var mTileY = backBuffer.width / mTileSize + 2; // 20px + 'wall'
 var mTiles = new Array(mTileX);
-
-var Tile = {
-  x,
-  y,
-  type
+for (var x = 0; x < mTileX; x++) {
+  mTiles[x] = new Array(mTileY);
+  for (var y = 0; y < mTileY; y++) {
+    mTiles[x][y] = (x == 0 || x == mTileX - 1 || y == 0 || y == mTileY - 1) ? "wall" : "open";
+  }
 }
 
 var Snake = {
-  x,
-  y,
-  tail,
-  direction,
-  speed
-}
-
-function start() {
-  for (var x = 0; x < mTileX; x++) {
-    mTiles[x] = new Array(mTileY);
-  }
-
-  Snake.direction = 'down';
-  Snake.x = 8;
-  Snake.y = 25;
-  Snake.tail = [[7, 25], [6, 25]];
+  direction: "down",
+  x: 8,
+  y: 25,
+  tail: [[7, 25], [6, 25]]
 }
 
 /**
@@ -76,6 +64,14 @@ function update(elapsedTime) {
   // TODO: Determine if the snake has eaten its tail
   // TODO: [Extra Credit] Determine if the snake has run into an obstacle
 
+  // Move Snake
+  moveSnake();
+
+  // Sync Snake position
+  mTiles[Snake.x, Snake.y] = "head";
+  for (var i = 0; i < Snake.tail.length; i++) {
+    mTiles[Snake.tail[i][0], Snake.tail[i][1]] = "body";
+  }
 }
 
 /**
@@ -89,7 +85,33 @@ function render(elapsedTime) {
 
   // TODO: Draw the game objects into the backBuffer
 
-  backCtx.fillRect(Snake.x * 20, Snake.y * 20, 20, 20);
+  for (var x = 0; x < mTileX; x++) {
+    for (var y = 0; y < mTileY; y++) {
+      switch (mTiles[x][y]) {
+        case "wall":
+          //console.log("wall");
+          break;
+
+        case "head":
+          backCtx.fillStyle = "green";
+          backCtx.fillRect((x - 1) * mTileSize, (y - 1) * mTileSize, mTileSize, mTileSize);
+          console.log("head");
+          break;
+
+        case "body":
+          backCtx.fillStyle = "green";
+          backCtx.fillRect((x - 1) * mTileSize, (y - 1) * mTileSize, mTileSize - 5, mTileSize - 5);
+          console.log("body");
+          break;
+
+        case "apple":
+          backCtx.fillStyle = "red";
+          backCtx.fillRect((x - 1) * mTileSize, (y - 1) * mTileSize, mTileSize - 5, mTileSize - 5);
+          console.log("apple");
+          break;
+      }
+    }
+  }
 
 }
 
@@ -114,8 +136,27 @@ function moveSnake() {
   }
 
   switch (lNextTile) {
+    case "wall":
+    case "head":
+    case "body":
+      
+      break;
 
+    case "apple":
+      Snake.tail.push([]);
+
+    case "open":
+      for (var i = Snake.tail.length - 1; i > 0; i--) {
+        Snake.tail[i][0] = Snake.tail[i - 1][0];
+        Snake.tail[i][1] = Snake.tail[i - 1][1];
+      }
+      Snake.tail[0][0] = Snake.x;
+      Snake.tail[0][1] = Snake.y;
+      Snake.x = lNextTile[0];
+      Snake.y = lNextTile[1];
+      break;
   }
+
 }
 
 window.onkeydown = function (event) { // onkeypress?
@@ -151,6 +192,5 @@ window.onkeydown = function (event) { // onkeypress?
   }
 }
 
-start();
 /* Launch the game */
 window.requestAnimationFrame(loop);
