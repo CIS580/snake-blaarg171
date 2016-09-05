@@ -8,13 +8,13 @@ var backCtx = backBuffer.getContext('2d');
 var oldTime = performance.now();
 
 var mTileSize = 20;
-var mTileX = backBuffer.height / mTileSize + 2; // 20px + 'wall'
-var mTileY = backBuffer.width / mTileSize + 2; // 20px + 'wall'
-var mTiles = new Array(mTileX);
-for (var x = 0; x < mTileX; x++) {
-  mTiles[x] = new Array(mTileY);
-  for (var y = 0; y < mTileY; y++) {
-    mTiles[x][y] = (x == 0 || x == mTileX - 1 || y == 0 || y == mTileY - 1) ? "wall" : "open";
+var mSizeX = backBuffer.height / mTileSize + 2; // 20px + 'wall'
+var mSizeY = backBuffer.width / mTileSize + 2; // 20px + 'wall'
+var mTiles = new Array(mSizeX);
+for (var x = 0; x < mSizeX; x++) {
+  mTiles[x] = new Array(mSizeY);
+  for (var y = 0; y < mSizeY; y++) {
+    mTiles[x][y] = (x == 0 || x == mSizeX - 1 || y == 0 || y == mSizeY - 1) ? "wall" : "open";
   }
 }
 
@@ -25,12 +25,17 @@ var Snake = {
   tail: [[7, 25], [6, 25]]
 }
 
+var mScore = 0;
+var mGameOver = false;
+
 /**
  * @function loop
  * The main game loop.
  * @param{time} the current time as a DOMHighResTimeStamp
  */
 function loop(newTime) {
+  if (mGameOver) return;
+
   var elapsedTime = newTime - oldTime;
   oldTime = newTime;
 
@@ -55,6 +60,7 @@ function loop(newTime) {
 function update(elapsedTime) {
 
   // use elapsedTime * snake pos to ensure game is same speed on every machine.
+  // different game speeds for difficulty?
 
   // TODO: Spawn an apple periodically
   // TODO: Grow the snake periodically
@@ -68,9 +74,9 @@ function update(elapsedTime) {
   moveSnake();
 
   // Sync Snake position
-  mTiles[Snake.x, Snake.y] = "head";
+  mTiles[Snake.x][Snake.y] = "head";
   for (var i = 0; i < Snake.tail.length; i++) {
-    mTiles[Snake.tail[i][0], Snake.tail[i][1]] = "body";
+    mTiles[Snake.tail[i][0]][Snake.tail[i][1]] = "body";
   }
 }
 
@@ -85,8 +91,8 @@ function render(elapsedTime) {
 
   // TODO: Draw the game objects into the backBuffer
 
-  for (var x = 0; x < mTileX; x++) {
-    for (var y = 0; y < mTileY; y++) {
+  for (var x = 0; x < mSizeX; x++) {
+    for (var y = 0; y < mSizeY; y++) {
       switch (mTiles[x][y]) {
         case "wall":
           //console.log("wall");
@@ -94,25 +100,27 @@ function render(elapsedTime) {
 
         case "head":
           backCtx.fillStyle = "green";
-          backCtx.fillRect((x - 1) * mTileSize, (y - 1) * mTileSize, mTileSize, mTileSize);
-          console.log("head");
+          backCtx.fillRect((y - 1) * mTileSize, (x - 1) * mTileSize, mTileSize, mTileSize);
+          //console.log("head");
           break;
 
         case "body":
           backCtx.fillStyle = "green";
-          backCtx.fillRect((x - 1) * mTileSize, (y - 1) * mTileSize, mTileSize - 5, mTileSize - 5);
-          console.log("body");
+          backCtx.fillRect(((y - 1) * mTileSize) + 3, (x - 1) * mTileSize, mTileSize - 6, mTileSize);
+          //console.log("body");
           break;
 
         case "apple":
           backCtx.fillStyle = "red";
-          backCtx.fillRect((x - 1) * mTileSize, (y - 1) * mTileSize, mTileSize - 5, mTileSize - 5);
-          console.log("apple");
+          backCtx.fillRect((y - 1) * mTileSize, (x - 1) * mTileSize, mTileSize - 6, mTileSize - 6);
+          //console.log("apple");
           break;
       }
     }
   }
 
+  // set score
+  document.getElementById("score").innerHTML = mScore;
 }
 
 function moveSnake() {
@@ -139,7 +147,10 @@ function moveSnake() {
     case "wall":
     case "head":
     case "body":
-      
+      backCtx.fillStyle = "purple"; // Something clear and obvious besides red since apples are red...
+      backCtx.font = "50px Verdana";
+      backCtx.fillText("GAME OVER", backBuffer.width / 2, backBuffer.height / 2);
+      mGameOver = true;
       break;
 
     case "apple":
