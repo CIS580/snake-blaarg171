@@ -1,17 +1,25 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Snake</title>
-    <link type="text/css" rel="stylesheet" href="snake.css" />
-  </head>
-  <body>
-    <h1>Play Snake</h1>
-    <canvas id="snake" width="760" height="480"></canvas>
-    <div id="scoreDiv">
-      <h4>Score:</h4>
-      <p id="score">0</p>
-    </div>
+
+<head>
+  <title>Snake</title>
+  <link type="text/css" rel="stylesheet" href="snake.css" />
+</head>
+
+<body>
+  <h1>Play Snake</h1>
+  <canvas id="snake" width="760" height="480"></canvas>
+  <div id="scoreDiv">
+    <h2>Score:</h2>
+    <p id="score">0</p>
+  </div>
+  <div>
     <h2>Instructions</h2>
-    <script type="text/javascript" src="snake.js"></script>
-  </body>
+    <p>
+      WASD to move.<br> Don't run into yourself, or off the board.<br> Eat apples to grow larger and score more!
+    </p>
+  </div>
+  <script type="text/javascript" src="snake.js"></script>
+</body>
+
 </html>

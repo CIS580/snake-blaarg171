@@ -7,6 +7,7 @@ backBuffer.height = frontBuffer.height;
 var backCtx = backBuffer.getContext('2d');
 var oldTime = performance.now();
 
+var mTickRate = 100;
 var mTileSize = 20;
 var mSizeX = backBuffer.height / mTileSize + 2; // 20px + 'wall'
 var mSizeY = backBuffer.width / mTileSize + 2; // 20px + 'wall'
@@ -25,28 +26,29 @@ var Snake = {
   tail: [[7, 25], [6, 25]]
 }
 
+var Apple = {
+  x: 16,
+  y: 3
+}
+
 var mScore = 0;
 var mGameOver = false;
 
 /**
  * @function loop
  * The main game loop.
- * @param{time} the current time as a DOMHighResTimeStamp
  */
-function loop(newTime) {
+function loop() {
   if (mGameOver) return;
 
-  var elapsedTime = newTime - oldTime;
-  oldTime = newTime;
-
-  update(elapsedTime);
-  render(elapsedTime);
+  update();
+  render();
 
   // Flip the back buffer
   frontCtx.drawImage(backBuffer, 0, 0);
 
   // Run the next loop
-  window.requestAnimationFrame(loop);
+  setTimeout(loop, mTickRate);
 }
 
 /**
@@ -57,10 +59,10 @@ function loop(newTime) {
  * @param {elapsedTime} A DOMHighResTimeStamp indicting
  * the number of milliseconds passed since the last frame.
  */
-function update(elapsedTime) {
+function update() {
 
-  // use elapsedTime * snake pos to ensure game is same speed on every machine.
   // different game speeds for difficulty?
+  // increasing tickrate?
 
   // TODO: Spawn an apple periodically
   // TODO: Grow the snake periodically
@@ -78,6 +80,8 @@ function update(elapsedTime) {
   for (var i = 0; i < Snake.tail.length; i++) {
     mTiles[Snake.tail[i][0]][Snake.tail[i][1]] = "body";
   }
+
+  mTiles[Apple.x][Apple.y] = "apple";
 }
 
 /**
@@ -86,7 +90,7 @@ function update(elapsedTime) {
   * @param {elapsedTime} A DOMHighResTimeStamp indicting
   * the number of milliseconds passed since the last frame.
   */
-function render(elapsedTime) {
+function render() {
   backCtx.clearRect(0, 0, backBuffer.width, backBuffer.height);
 
   // TODO: Draw the game objects into the backBuffer
@@ -112,7 +116,7 @@ function render(elapsedTime) {
 
         case "apple":
           backCtx.fillStyle = "red";
-          backCtx.fillRect((y - 1) * mTileSize, (x - 1) * mTileSize, mTileSize - 6, mTileSize - 6);
+          backCtx.fillRect(((y - 1) * mTileSize) + 3, ((x - 1) * mTileSize) + 3, mTileSize - 6, mTileSize - 6);
           //console.log("apple");
           break;
       }
@@ -153,9 +157,12 @@ function moveSnake() {
     case "wall":
     case "head":
     case "body":
-      backCtx.fillStyle = "purple"; // Something clear and obvious besides red since apples are red...
-      backCtx.font = "50px Verdana";
-      backCtx.fillText("GAME OVER", backBuffer.width / 2, backBuffer.height / 2);
+      // Should this be in render()?
+      frontCtx.fillStyle = "purple"; // Something clear and obvious besides red since apples are red...
+      frontCtx.font = "bold 60px Verdana";
+      frontCtx.textAlign = "center";
+      frontCtx.textBaseline = "middle";
+      frontCtx.fillText("GAME OVER", backBuffer.width / 2, backBuffer.height / 2);
       mGameOver = true;
       break;
 
@@ -210,4 +217,6 @@ window.onkeydown = function (event) { // onkeypress?
 }
 
 /* Launch the game */
-window.requestAnimationFrame(loop);
+//window.requestAnimationFrame(loop);
+
+loop();
