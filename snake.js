@@ -124,26 +124,32 @@ function render(elapsedTime) {
 }
 
 function moveSnake() {
-  var lNextTile;
+  var lNextTile = new Object();
   switch (Snake.direction) {
     case "up":
-      lNextTile = mTiles[Snake.x - 1][Snake.y];
+      lNextTile.x = Snake.x - 1;
+      lNextTile.y = Snake.y;
       break;
 
     case "left":
-      lNextTile = [Snake.x][Snake.y - 1];
+      lNextTile.x = Snake.x;
+      lNextTile.y = Snake.y - 1;
       break;
 
     case "right":
-      lNextTile = [Snake.x][Snake.y + 1];
+      lNextTile.x = Snake.x;
+      lNextTile.y = Snake.y + 1;
       break;
 
     case "down":
-      lNextTile = [Snake.x + 1][Snake.y];
+      lNextTile.x = Snake.x + 1;
+      lNextTile.y = Snake.y;
       break;
   }
 
-  switch (lNextTile) {
+  lNextTile.type = mTiles[lNextTile.x][lNextTile.y];
+
+  switch (lNextTile.type) {
     case "wall":
     case "head":
     case "body":
@@ -163,8 +169,8 @@ function moveSnake() {
       }
       Snake.tail[0][0] = Snake.x;
       Snake.tail[0][1] = Snake.y;
-      Snake.x = lNextTile[0];
-      Snake.y = lNextTile[1];
+      Snake.x = lNextTile.x;
+      Snake.y = lNextTile.y;
       break;
   }
 
