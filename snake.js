@@ -27,6 +27,7 @@ var Snake = {
 }
 
 var Apple = {
+  spawned: true,
   x: 16,
   y: 3
 }
@@ -39,10 +40,10 @@ var mGameOver = false;
  * The main game loop.
  */
 function loop() {
-  if (mGameOver) return;
-
   update();
   render();
+
+  if (mGameOver) return;
 
   // Flip the back buffer
   frontCtx.drawImage(backBuffer, 0, 0);
@@ -75,13 +76,7 @@ function update() {
   // Move Snake
   moveSnake();
 
-  // Sync Snake position
-  mTiles[Snake.x][Snake.y] = "head";
-  for (var i = 0; i < Snake.tail.length; i++) {
-    mTiles[Snake.tail[i][0]][Snake.tail[i][1]] = "body";
-  }
-
-  mTiles[Apple.x][Apple.y] = "apple";
+  if (Apple.spawned) mTiles[Apple.x][Apple.y] = "apple";
 }
 
 /**
@@ -92,6 +87,8 @@ function update() {
   */
 function render() {
   backCtx.clearRect(0, 0, backBuffer.width, backBuffer.height);
+  backCtx.fillStyle = "white";
+  backCtx.fillRect(0, 0, backBuffer.width, backBuffer.height);
 
   // TODO: Draw the game objects into the backBuffer
 
@@ -99,25 +96,26 @@ function render() {
     for (var y = 0; y < mSizeY; y++) {
       switch (mTiles[x][y]) {
         case "wall":
-          //console.log("wall");
           break;
+
+        /*case "open":
+          backCtx.fillStyle = "white";
+          backCtx.fillRect((y - 1) * mTileSize, (x - 1) * mTileSize, mTileSize, mTileSize);
+          break;*/
 
         case "head":
           backCtx.fillStyle = "green";
           backCtx.fillRect((y - 1) * mTileSize, (x - 1) * mTileSize, mTileSize, mTileSize);
-          //console.log("head");
           break;
 
         case "body":
           backCtx.fillStyle = "green";
-          backCtx.fillRect(((y - 1) * mTileSize) + 3, (x - 1) * mTileSize, mTileSize - 6, mTileSize);
-          //console.log("body");
+          backCtx.fillRect(((y - 1) * mTileSize) + 3, ((x - 1) * mTileSize) + 3, mTileSize - 6, mTileSize - 6);
           break;
 
         case "apple":
           backCtx.fillStyle = "red";
           backCtx.fillRect(((y - 1) * mTileSize) + 3, ((x - 1) * mTileSize) + 3, mTileSize - 6, mTileSize - 6);
-          //console.log("apple");
           break;
       }
     }
@@ -167,17 +165,34 @@ function moveSnake() {
       break;
 
     case "apple":
-      Snake.tail.push([]);
+      Snake.tail.push([-1, -1]);
+      Apple.spawned = false;
+      mScore += 5;
 
     case "open":
+      // reset tail tile
+      var lLastX = Snake.tail[Snake.tail.length - 1][0];
+      var lLastY = Snake.tail[Snake.tail.length - 1][1];
+      if (lLastX == -1) lLastX = Snake.tail[Snake.tail.length - 2][0];
+      if (lLastX == -1) lLastY = Snake.tail[Snake.tail.length - 2][1];
+      mTiles[lLastX][lLastY] = "open";
+
+      // shift body positions and set tile 
       for (var i = Snake.tail.length - 1; i > 0; i--) {
         Snake.tail[i][0] = Snake.tail[i - 1][0];
         Snake.tail[i][1] = Snake.tail[i - 1][1];
+        mTiles[Snake.tail[i][0]][Snake.tail[i][1]] = "body";
       }
+
+      // set old head to start of tail
       Snake.tail[0][0] = Snake.x;
       Snake.tail[0][1] = Snake.y;
+      mTiles[Snake.x][Snake.y] = "body";
+
+      // set new head
       Snake.x = lNextTile.x;
       Snake.y = lNextTile.y;
+      mTiles[Snake.x][Snake.y] = "head";
       break;
   }
 
