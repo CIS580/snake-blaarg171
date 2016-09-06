@@ -26,13 +26,15 @@ var Snake = {
 }
 
 var Apple = {
+  timer: 50,
+  lastSpawn: oldTime,
   spawned: true,
   x: 16,
   y: 3
 }
 
 var mTickRate = 150;
-var mTickTimer = 0;
+var mTickTimer = 100; // start at a portion of the tickrate but not fully.
 
 var mScore = 0;
 var mGameOver = false;
@@ -77,10 +79,6 @@ function update(elapsedTime) {
 
   // TODO: Spawn an apple periodically
   // TODO: Grow the snake periodically
-  // TODO: Move the snake
-  // TODO: Determine if the snake has moved out-of-bounds (offscreen)
-  // TODO: Determine if the snake has eaten an apple
-  // TODO: Determine if the snake has eaten its tail
   // TODO: [Extra Credit] Determine if the snake has run into an obstacle
 
   // Move Snake
@@ -125,7 +123,10 @@ function render(elapsedTime) {
 
         case "apple":
           backCtx.fillStyle = "red";
-          backCtx.fillRect(((y - 1) * mTileSize) + 3, ((x - 1) * mTileSize) + 3, mTileSize - 6, mTileSize - 6);
+          //backCtx.fillRect(((y - 1) * mTileSize) + 3, ((x - 1) * mTileSize) + 3, mTileSize - 6, mTileSize - 6);
+          backCtx.beginPath();
+          backCtx.arc(((y - 1) * mTileSize) + (mTileSize / 2), ((x - 1) * mTileSize) + (mTileSize / 2), mTileSize / 2, 0, 2 * Math.PI);
+          backCtx.fill();
           break;
       }
     }
