@@ -26,11 +26,13 @@ var Snake = {
 }
 
 var Apple = {
+  rate: 50,
   timer: 50,
   lastSpawn: oldTime,
-  spawned: true,
+  spawned: false,
   x: 16,
-  y: 3
+  y: 3,
+  value: 5
 }
 
 var mTickRate = 150;
@@ -81,10 +83,11 @@ function update(elapsedTime) {
   // TODO: Grow the snake periodically
   // TODO: [Extra Credit] Determine if the snake has run into an obstacle
 
-  // Move Snake
+  // Snake related activities
   moveSnake();
 
-  if (Apple.spawned) mTiles[Apple.x][Apple.y] = "apple";
+  // Apple related activities
+  handleApple(elapsedTime);
 }
 
 /**
@@ -100,10 +103,12 @@ function render(elapsedTime) {
 
   // TODO: Draw the game objects into the backBuffer
 
-  for (var x = 0; x < mSizeX; x++) {
-    for (var y = 0; y < mSizeY; y++) {
+  for (var x = 1; x < mSizeX - 1; x++) {
+    for (var y = 1; y < mSizeY - 1; y++) {
       switch (mTiles[x][y]) {
         case "wall":
+          backCtx.fillStyle = "black";
+          backCtx.fillRect((y - 1) * mTileSize, (x - 1) * mTileSize, mTileSize, mTileSize);
           break;
 
         /*case "open":
@@ -123,7 +128,6 @@ function render(elapsedTime) {
 
         case "apple":
           backCtx.fillStyle = "red";
-          //backCtx.fillRect(((y - 1) * mTileSize) + 3, ((x - 1) * mTileSize) + 3, mTileSize - 6, mTileSize - 6);
           backCtx.beginPath();
           backCtx.arc(((y - 1) * mTileSize) + (mTileSize / 2), ((x - 1) * mTileSize) + (mTileSize / 2), mTileSize / 2, 0, 2 * Math.PI);
           backCtx.fill();
@@ -134,6 +138,28 @@ function render(elapsedTime) {
 
   // set score
   document.getElementById("score").innerHTML = mScore;
+}
+
+function handleApple(elapsedTime) {
+  Apple.timer += elapsedTime;
+  if (Apple.spawned) {
+    if (Apple.value > 5) Apple.value--;
+    return;
+  }
+
+  if (Apple.timer >= Apple.rate) {
+    Apple.timer = 0;
+    Apple.value = 50;
+
+    var lNewTile = randomTile(2, mSizeX - 1);
+    Apple.x = lNewTile.x;
+    Apple.y = lNewTile.y;
+
+    Apple.spawned = true;
+
+    mTiles[Apple.x][Apple.y] = "apple";
+  }
+
 }
 
 function moveSnake() {
@@ -240,6 +266,19 @@ window.onkeydown = function (event) { // onkeypress?
       if (Snake.direction != "up") Snake.direction = "down";
       break;
   }
+}
+
+function rollRandom(aMinimum, aMaximum) {
+  return Math.random() * (aMaximum - aMinimum) + aMinimum;
+}
+
+function randomTile(aMinimum, aMaximum) {
+  var lTile = { x: -1, y: -1 }
+  do {
+    lTile.x = Math.floor(rollRandom(aMinimum, aMaximum));
+    lTile.y = Math.floor(rollRandom(aMinimum, aMaximum));
+  } while (mTiles[lTile.x][lTile.y] != "open")
+  return lTile;
 }
 
 /* Launch the game */
