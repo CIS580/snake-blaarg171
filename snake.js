@@ -7,7 +7,6 @@ backBuffer.height = frontBuffer.height;
 var backCtx = backBuffer.getContext('2d');
 var oldTime = performance.now();
 
-var mTickRate = 100;
 var mTileSize = 20;
 var mSizeX = backBuffer.height / mTileSize + 2; // 20px + 'wall'
 var mSizeY = backBuffer.width / mTileSize + 2; // 20px + 'wall'
@@ -32,24 +31,35 @@ var Apple = {
   y: 3
 }
 
+var mTickRate = 150;
+var mTickTimer = 0;
+
 var mScore = 0;
 var mGameOver = false;
 
 /**
  * @function loop
  * The main game loop.
+ * @param{time} the current time as a DOMHighResTimeStamp
  */
-function loop() {
-  update();
-  render();
+function loop(newTime) {
+  var elapsedTime = newTime - oldTime;
+  oldTime = newTime;
+  mTickTimer += elapsedTime;
 
-  if (mGameOver) return;
+  if (mTickTimer >= mTickRate) {
+    mTickTimer = 0;
+    update(elapsedTime);
+    render(elapsedTime);
 
-  // Flip the back buffer
-  frontCtx.drawImage(backBuffer, 0, 0);
+    if (mGameOver) return;
+
+    // Flip the back buffer
+    frontCtx.drawImage(backBuffer, 0, 0);
+  }
 
   // Run the next loop
-  setTimeout(loop, mTickRate);
+  window.requestAnimationFrame(loop);
 }
 
 /**
@@ -60,7 +70,7 @@ function loop() {
  * @param {elapsedTime} A DOMHighResTimeStamp indicting
  * the number of milliseconds passed since the last frame.
  */
-function update() {
+function update(elapsedTime) {
 
   // different game speeds for difficulty?
   // increasing tickrate?
@@ -85,7 +95,7 @@ function update() {
   * @param {elapsedTime} A DOMHighResTimeStamp indicting
   * the number of milliseconds passed since the last frame.
   */
-function render() {
+function render(elapsedTime) {
   backCtx.clearRect(0, 0, backBuffer.width, backBuffer.height);
   backCtx.fillStyle = "white";
   backCtx.fillRect(0, 0, backBuffer.width, backBuffer.height);
@@ -232,6 +242,4 @@ window.onkeydown = function (event) { // onkeypress?
 }
 
 /* Launch the game */
-//window.requestAnimationFrame(loop);
-
-loop();
+window.requestAnimationFrame(loop);
