@@ -9,14 +9,28 @@
 <body>
   <h1>Play Snake</h1>
   <canvas id="snake" width="760" height="480"></canvas>
-  <div id="scoreDiv">
-    <h2>Score:</h2>
-    <p id="score">0</p>
-  </div>
+
+  <table id="sidebar">
+    <col width="150">
+    <tr>
+      <th>Current Score: </th>
+      <th id="scoreCurrent">0</th>
+    </tr>
+    <tr>
+      <th>High Score: </th>
+      <th id="scoreHigh">0</th>
+    </tr>
+    <td><br></td>
+    <tr>
+      <th><a id="newGame" onclick="initializeGame()" href="#">New Game</a></th>
+    </tr>
+  </table>
+
   <div>
     <h2>Instructions</h2>
     <p>
-      WASD or Arrow keys to move.<br>Don't eat yourself!<br>Don't run into walls, or off the board.<br>Eat apples to grow larger and score more!
+      Press Space to start a new game.<br>WASD or Arrow keys to move.<br>Don't eat yourself!<br>Don't run into walls, or
+      off the board.<br>Eat the apples that spawn randomly to grow larger and score more!
     </p>
   </div>
   <script type="text/javascript" src="snake.js"></script>

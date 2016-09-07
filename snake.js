@@ -11,35 +11,17 @@ var mTileSize = 20;
 var mSizeX = backBuffer.height / mTileSize + 2; // 20px + 'wall'
 var mSizeY = backBuffer.width / mTileSize + 2; // 20px + 'wall'
 var mTiles = new Array(mSizeX);
-for (var x = 0; x < mSizeX; x++) {
-  mTiles[x] = new Array(mSizeY);
-  for (var y = 0; y < mSizeY; y++) {
-    mTiles[x][y] = (x == 0 || x == mSizeX - 1 || y == 0 || y == mSizeY - 1) ? "wall" : "open";
-  }
-}
 
-var Snake = {
-  direction: "down",
-  x: 8,
-  y: 25,
-  tail: [[7, 25], [6, 25]]
-}
+var Snake = new Object();
+var Apple = new Object();
+var Obstacles = new Array();
 
-var Apple = {
-  rate: 50,
-  timer: 50,
-  lastSpawn: oldTime,
-  spawned: false,
-  x: 16,
-  y: 3,
-  value: 5
-}
-
-var mTickRate = 150;
+var mTickRate = 125;
 var mTickTimer = 100; // start at a portion of the tickrate but not fully.
 
 var mScore = 0;
-var mGameOver = false;
+var mGameOver = true;
+var mInitialized = false;
 
 /**
  * @function loop
@@ -75,19 +57,14 @@ function loop(newTime) {
  * the number of milliseconds passed since the last frame.
  */
 function update(elapsedTime) {
-
-  // different game speeds for difficulty?
-  // increasing tickrate?
-
-  // TODO: Spawn an apple periodically
-  // TODO: Grow the snake periodically
   // TODO: [Extra Credit] Determine if the snake has run into an obstacle
 
   // Snake related activities
   moveSnake();
 
-  // Apple related activities
+  // Handle Apples and Walls
   handleApple(elapsedTime);
+  handleObstacles();
 }
 
 /**
@@ -137,29 +114,7 @@ function render(elapsedTime) {
   }
 
   // set score
-  document.getElementById("score").innerHTML = mScore;
-}
-
-function handleApple(elapsedTime) {
-  Apple.timer += elapsedTime;
-  if (Apple.spawned) {
-    if (Apple.value > 5) Apple.value--;
-    return;
-  }
-
-  if (Apple.timer >= Apple.rate) {
-    Apple.timer = 0;
-    Apple.value = 50;
-
-    var lNewTile = randomTile(2, mSizeX - 1);
-    Apple.x = lNewTile.x;
-    Apple.y = lNewTile.y;
-
-    Apple.spawned = true;
-
-    mTiles[Apple.x][Apple.y] = "apple";
-  }
-
+  document.getElementById("scoreCurrent").innerHTML = mScore;
 }
 
 function moveSnake() {
@@ -195,16 +150,15 @@ function moveSnake() {
       // Should this be in render()?
       frontCtx.fillStyle = "purple"; // Something clear and obvious besides red since apples are red...
       frontCtx.font = "bold 60px Verdana";
-      frontCtx.textAlign = "center";
-      frontCtx.textBaseline = "middle";
       frontCtx.fillText("GAME OVER", backBuffer.width / 2, backBuffer.height / 2);
       mGameOver = true;
+      if (mScore > document.getElementById("scoreHigh").innerHTML) document.getElementById("scoreHigh").innerHTML = mScore;
       break;
 
     case "apple":
       Snake.tail.push([-1, -1]);
       Apple.spawned = false;
-      mScore += 5;
+      mScore += Apple.value;
 
     case "open":
       // reset tail tile
@@ -233,6 +187,76 @@ function moveSnake() {
       break;
   }
 
+}
+
+function handleApple(elapsedTime) {
+  Apple.timer += elapsedTime;
+  if (Apple.spawned) {
+    if (Apple.value > 5) Apple.value--;
+    return;
+  }
+
+  if (Apple.timer >= Apple.rate) {
+    Apple.timer = 0;
+    Apple.rate = rollRandom(50, 500);
+    Apple.value = Math.min(25 + Math.max(Snake.tail.length - 7, 0) * 5, 100);
+
+    var lNewTile = randomTile();
+    Apple.x = lNewTile.x;
+    Apple.y = lNewTile.y;
+
+    Apple.spawned = true;
+
+    mTiles[Apple.x][Apple.y] = "apple";
+  }
+}
+
+function handleObstacles() {
+  if (Snake.tail.length - 12 >= Obstacles.length) {
+    var lNewObstacle = randomTile();
+    Obstacles.push(lNewObstacle);
+    mTiles[lNewObstacle.x][lNewObstacle.y] = "wall";
+  }
+}
+
+function initializeGame() {
+  frontCtx.fillStyle = "white";
+  frontCtx.fillRect(0, 0, backBuffer.width, backBuffer.height);
+  frontCtx.fillStyle = "black";
+  frontCtx.font = "bold 40px Verdana";
+  frontCtx.textAlign = "center";
+  frontCtx.textBaseline = "middle";
+  frontCtx.fillText("Press Space to start!", backBuffer.width / 2, backBuffer.height / 2);
+
+  // reset tiles
+  for (var x = 0; x < mSizeX; x++) {
+    mTiles[x] = new Array(mSizeY);
+    for (var y = 0; y < mSizeY; y++) {
+      mTiles[x][y] = (x == 0 || x == mSizeX - 1 || y == 0 || y == mSizeY - 1) ? "wall" : "open";
+    }
+  }
+
+  Snake.direction = "down";
+  Snake.x = 8;
+  Snake.y = 25;
+  Snake.tail = [[7, 25], [6, 25]];
+
+  Apple.rate = 50;
+  Apple.timer = 50;
+  Apple.lastSpawn = oldTime;
+  Apple.spawned = false;
+  Apple.x = 16;
+  Apple.y = 3;
+  Apple.value = 5;
+
+  mInitialized = true;
+  mGameOver = !mInitialized;
+}
+
+/* Launch the game */
+function startGame() {
+  mInitialized = false;
+  window.requestAnimationFrame(loop);
 }
 
 window.onkeydown = function (event) { // onkeypress?
@@ -265,21 +289,26 @@ window.onkeydown = function (event) { // onkeypress?
       event.preventDefault();
       if (Snake.direction != "up") Snake.direction = "down";
       break;
+
+    //Space
+    case 32:
+      event.preventDefault();
+      if (mInitialized) startGame();
+      break;
   }
 }
 
 function rollRandom(aMinimum, aMaximum) {
-  return Math.random() * (aMaximum - aMinimum) + aMinimum;
+  return Math.floor(Math.random() * (aMaximum - aMinimum) + aMinimum);
 }
 
-function randomTile(aMinimum, aMaximum) {
+function randomTile() {
   var lTile = { x: -1, y: -1 }
   do {
-    lTile.x = Math.floor(rollRandom(aMinimum, aMaximum));
-    lTile.y = Math.floor(rollRandom(aMinimum, aMaximum));
+    lTile.x = rollRandom(1, mSizeX - 1);
+    lTile.y = rollRandom(1, mSizeY - 1);
   } while (mTiles[lTile.x][lTile.y] != "open")
   return lTile;
 }
 
-/* Launch the game */
-window.requestAnimationFrame(loop);
+initializeGame();

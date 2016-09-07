@@ -3,10 +3,15 @@ canvas#snake {
   box-shadow: 4px 4px 4px #777;
 }
 
-#scoreDiv {
+#sidebar {
   display: inline-block;
-  vertical-align: top;
   margin-left: 1em;
+  vertical-align: top;
+}
+
+th {
+  text-align: left;
+  font-size: large;
   font-weight: bold;
 }
 
