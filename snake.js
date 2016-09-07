@@ -1,3 +1,8 @@
+/* © 2016 Lowell Scott
+ * Snake game, KSU CIS 580
+ * 
+*/
+
 /* Global variables */
 var frontBuffer = document.getElementById('snake');
 var frontCtx = frontBuffer.getContext('2d');
