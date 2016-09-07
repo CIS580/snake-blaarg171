@@ -148,10 +148,13 @@ function spawnSnake() {
       Snake.tail = [[Snake.x, Snake.y + 1], [Snake.x, Snake.y + 2]]
       break;
   }
+
+  Snake.nextDirection = Snake.direction;
 }
 
 function moveSnake() {
   var lNextTile = new Object();
+  validateDirection();
   switch (Snake.direction) {
     case "up":
       lNextTile.x = Snake.x - 1;
@@ -219,7 +222,25 @@ function moveSnake() {
       mTiles[Snake.x][Snake.y] = "head";
       break;
   }
+}
 
+function validateDirection() {
+  if (Snake.nextDirection == Snake.direction) return;
+  switch (Snake.direction) {
+    case "up":
+      if (Snake.nextDirection == "down") Snake.nextDirection = "up";
+      break;
+    case "left":
+      if (Snake.nextDirection == "right") Snake.nextDirection = "left";
+      break;
+    case "down":
+      if (Snake.nextDirection == "up") Snake.nextDirection = "down";
+      break;
+    case "right":
+      if (Snake.nextDirection == "left") Snake.nextDirection = "right";
+      break;
+  }
+  Snake.direction = Snake.nextDirection;
 }
 
 function handleApple(elapsedTime) {
@@ -298,28 +319,28 @@ window.onkeydown = function (event) { // onkeypress?
     case 38:
     case 87:
       event.preventDefault();
-      if (Snake.direction != "down") Snake.direction = "up";
+      Snake.nextDirection = "up";
       break;
 
     //Left
     case 37:
     case 65:
       event.preventDefault();
-      if (Snake.direction != "right") Snake.direction = "left";
+      Snake.nextDirection = "left";
       break;
 
     //Right
     case 39:
     case 68:
       event.preventDefault();
-      if (Snake.direction != "left") Snake.direction = "right";
+      Snake.nextDirection = "right";
       break;
 
     //Down
     case 40:
     case 83:
       event.preventDefault();
-      if (Snake.direction != "up") Snake.direction = "down";
+      Snake.nextDirection = "down";
       break;
 
     //Space
