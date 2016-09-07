@@ -194,6 +194,7 @@ function moveSnake() {
     case "apple":
       Snake.tail.push([-1, -1]);
       Apple.spawned = false;
+      Apple.count++;
       mScore += Apple.value;
 
     case "open":
@@ -252,8 +253,8 @@ function handleApple(elapsedTime) {
 
   if (Apple.timer >= Apple.rate) {
     Apple.timer = 0;
-    Apple.rate = rollRandom(50, 500);
-    Apple.value = Math.min(25 + Math.max(Snake.tail.length - 7, 0) * 5, 100);
+    Apple.rate = rollRandom(75, 500);
+    Apple.value = Math.min(25 + Math.max(Apple.count - 5, 0) * 10, 100);
 
     var lNewTile = randomTile(1);
     Apple.x = lNewTile.x;
@@ -266,7 +267,11 @@ function handleApple(elapsedTime) {
 }
 
 function handleObstacles() {
-  if (Snake.tail.length - 12 >= Obstacles.length) {
+  var lBase = Apple.count - 10;
+  var lPerApple = Math.floor(lBase / 10);
+  var lTotal = lBase + lBase * lPerApple;
+
+  while (Obstacles.length < lTotal) {
     var lNewObstacle = randomTile(1);
     Obstacles.push(lNewObstacle);
     mTiles[lNewObstacle.x][lNewObstacle.y] = "wall";
@@ -301,6 +306,9 @@ function initializeGame() {
   Apple.x = -1;
   Apple.y = -1;
   Apple.value = 5;
+  Apple.count = 0;
+
+  Obstacles = new Array();
 
   mInitialized = true;
   mGameOver = !mInitialized;
