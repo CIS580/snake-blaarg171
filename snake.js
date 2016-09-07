@@ -122,6 +122,34 @@ function render(elapsedTime) {
   document.getElementById("scoreCurrent").innerHTML = mScore;
 }
 
+function spawnSnake() {
+  var lHead = randomTile(5);
+  Snake.x = lHead.x;
+  Snake.y = lHead.y;
+
+  switch (rollRandom(0, 3)) {
+    case 0:
+      Snake.direction = "up";
+      Snake.tail = [[Snake.x - 1, Snake.y], [Snake.x - 2, Snake.y]]
+      break;
+
+    case 1:
+      Snake.direction = "left";
+      Snake.tail = [[Snake.x, Snake.y - 1], [Snake.x, Snake.y - 2]]
+      break;
+
+    case 2:
+      Snake.direction = "down";
+      Snake.tail = [[Snake.x + 1, Snake.y], [Snake.x + 2, Snake.y]]
+      break;
+
+    case 3:
+      Snake.direction = "right";
+      Snake.tail = [[Snake.x, Snake.y + 1], [Snake.x, Snake.y + 2]]
+      break;
+  }
+}
+
 function moveSnake() {
   var lNextTile = new Object();
   switch (Snake.direction) {
@@ -135,14 +163,14 @@ function moveSnake() {
       lNextTile.y = Snake.y - 1;
       break;
 
-    case "right":
-      lNextTile.x = Snake.x;
-      lNextTile.y = Snake.y + 1;
-      break;
-
     case "down":
       lNextTile.x = Snake.x + 1;
       lNextTile.y = Snake.y;
+      break;
+
+    case "right":
+      lNextTile.x = Snake.x;
+      lNextTile.y = Snake.y + 1;
       break;
   }
 
@@ -206,7 +234,7 @@ function handleApple(elapsedTime) {
     Apple.rate = rollRandom(50, 500);
     Apple.value = Math.min(25 + Math.max(Snake.tail.length - 7, 0) * 5, 100);
 
-    var lNewTile = randomTile();
+    var lNewTile = randomTile(1);
     Apple.x = lNewTile.x;
     Apple.y = lNewTile.y;
 
@@ -218,7 +246,7 @@ function handleApple(elapsedTime) {
 
 function handleObstacles() {
   if (Snake.tail.length - 12 >= Obstacles.length) {
-    var lNewObstacle = randomTile();
+    var lNewObstacle = randomTile(1);
     Obstacles.push(lNewObstacle);
     mTiles[lNewObstacle.x][lNewObstacle.y] = "wall";
   }
@@ -241,17 +269,16 @@ function initializeGame() {
     }
   }
 
-  Snake.direction = "down";
-  Snake.x = 8;
-  Snake.y = 25;
-  Snake.tail = [[7, 25], [6, 25]];
+  mScore = 0;
+
+  spawnSnake();
 
   Apple.rate = 50;
   Apple.timer = 50;
   Apple.lastSpawn = oldTime;
   Apple.spawned = false;
-  Apple.x = 16;
-  Apple.y = 3;
+  Apple.x = -1;
+  Apple.y = -1;
   Apple.value = 5;
 
   mInitialized = true;
@@ -307,11 +334,11 @@ function rollRandom(aMinimum, aMaximum) {
   return Math.floor(Math.random() * (aMaximum - aMinimum) + aMinimum);
 }
 
-function randomTile() {
+function randomTile(aBound) {
   var lTile = { x: -1, y: -1 }
   do {
-    lTile.x = rollRandom(1, mSizeX - 1);
-    lTile.y = rollRandom(1, mSizeY - 1);
+    lTile.x = rollRandom(aBound, (mSizeX - 1) - aBound);
+    lTile.y = rollRandom(aBound, (mSizeY - 1) - aBound);
   } while (mTiles[lTile.x][lTile.y] != "open")
   return lTile;
 }
