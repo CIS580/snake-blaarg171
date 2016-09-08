@@ -247,14 +247,14 @@ function validateDirection() {
 function handleApple(elapsedTime) {
   Apple.timer += elapsedTime;
   if (Apple.spawned) {
-    if (Apple.value > 5) Apple.value--;
+    if (Apple.value > 10) Apple.value--;
     return;
   }
 
   if (Apple.timer >= Apple.rate) {
     Apple.timer = 0;
-    Apple.rate = rollRandom(75, 500);
-    Apple.value = Math.min(25 + Math.max(Apple.count - 5, 0) * 10, 100);
+    Apple.rate = rollRandom(100, 500);
+    Apple.value = Math.min(50 + Obstacles.length * 5, 500);
 
     var lNewTile = randomTile(1);
     Apple.x = lNewTile.x;
@@ -267,11 +267,7 @@ function handleApple(elapsedTime) {
 }
 
 function handleObstacles() {
-  var lBase = Apple.count - 10;
-  var lPerApple = Math.floor(lBase / 10);
-  var lTotal = lBase + lBase * lPerApple;
-
-  while (Obstacles.length < lTotal) {
+  if (Snake.tail.length - 12 >= Obstacles.length) {
     var lNewObstacle = randomTile(1);
     Obstacles.push(lNewObstacle);
     mTiles[lNewObstacle.x][lNewObstacle.y] = "wall";
